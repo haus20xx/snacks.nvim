@@ -320,6 +320,23 @@ function M:loc()
     return
   end
 
+  -- Handle terminal buffers specially
+  if vim.bo[self.win.buf].buftype == "terminal" then
+    -- Switch to normal mode first
+    vim.api.nvim_win_call(self.win.win, function()
+      if vim.fn.mode() == "t" then
+        vim.cmd("stopinsert")
+      end
+    end)
+
+    -- Terminals don't support search/positioning/extmarks well
+    -- Just ensure cursorline is visible
+    vim.schedule(function()
+      self:wo({ cursorline = true })
+    end)
+    return
+  end
+
   local line_count = vim.api.nvim_buf_line_count(self.win.buf)
   Snacks.picker.util.resolve_loc(self.item, self.win.buf)
 

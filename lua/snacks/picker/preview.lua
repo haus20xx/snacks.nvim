@@ -102,6 +102,21 @@ function M.file(ctx)
   end
 
   if ctx.item.buf and vim.api.nvim_buf_is_loaded(ctx.item.buf) then
+    if ctx.item.buf and vim.api.nvim_buf_is_loaded(ctx.item.buf) then
+      -- Check if this is a terminal buffer
+      if vim.bo[ctx.item.buf].buftype == "terminal" then
+        if not title then
+          local name = vim.api.nvim_buf_get_name(ctx.item.buf)
+          title = name ~= "" and vim.fn.fnamemodify(name, ":t") or "[Terminal]"
+        end
+        ctx.preview:set_title(title)
+        ctx.preview:set_buf(ctx.item.buf)
+        -- Don't call ctx.preview:loc() for terminals
+        -- Terminal positioning doesn't work the same way
+        return
+      end
+    end
+
     if not title then
       local name = vim.api.nvim_buf_get_name(ctx.item.buf)
       title = uv.fs_stat(name) and vim.fn.fnamemodify(name, ":t") or name
